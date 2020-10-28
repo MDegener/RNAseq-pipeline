@@ -92,16 +92,3 @@ In `config/nextflow.config`, you can define a profile for your processing enviro
 5. Or 3. and 4. combined: `--flow="bam,miso,rnaseqc"`
 
 Note: It is currently not possible to align FASTQ files, sort/index BAM files and run MISO or RNASeQC in one instance of the pipeline. Instead, you should first run the pipeline with `--flow="fastqc,star,sort,index,multiqc"` and subsequently with `--flow="bam,miso,rnaseqc"`.
-
-## Overview of files and directories
-
-| File/Directory| Description          |
-|---------------|--------------------------------------------------------------------------|
-| example      |  contains example fastq and bam files to test pipeline  |
-| nextflow      |  nextflow code  |
-| nextflow.config      |  config for nextflow pipeline with default parameters and system profiles  |
-| main.nf      |  main pipeline script  |
-| miso_settings.txt      |  config for [MISO](https://miso.readthedocs.io/en/fastmiso/)  |
-| multiqc_config.yaml      |  config for [MultiQC](https://multiqc.info/)  |
-
-
