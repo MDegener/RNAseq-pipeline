@@ -1,0 +1,7 @@
+title: "General, alignment, and assignment quality overview"
+subtitle: "RNAseq analysis pipeline, CMBI-RTC"
+
+report_header_info:
+    - Contact E-mail: 'charlotte.kaffa@radboudumc.nl'
+    - Application Type: 'RNAseq analysis pipeline using existing tools and packages in Nextflow'
+    - Project Type: 'RTC research-support'
