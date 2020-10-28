@@ -6,7 +6,7 @@ date = new java.util.Date().format("ddMMyyyyhhmmss")
 // Show used parameters
 log.info "RNAseq - N F  ~  version 0.1"
 log.info "====================================="
-log.info "inDir                  : ${params.inDir}"
+log.info "inFiles                  : ${params.inFiles}"
 log.info "outDir                 : ${params.outDir}"
 log.info "species                : ${params.species}"
 log.info "flow                   : ${params.flow}"
@@ -14,7 +14,7 @@ log.info "====================================="
 log.info "\n"
 
 /*
- * General inDir parameters validation
+ * General inFiles parameters validation
  */
  
 libDir                         	= params.libDir
@@ -26,20 +26,20 @@ if(params.species == "human"){
     star_index                  = file(libDir+"/star_index_gencode_v26/")
     gtf                         = file(libDir+"/gencode.v26.annotation.gtf")
     miso_annotation             = file(libDir+"/miso_SE_indexed_hg38/")
-    miso_settings               = file(baseDir+"/miso_settings.txt")
+    miso_settings               = file(baseDir+"/config/miso_settings.txt")
 }
     
 flow = flow.split(',').collect { it.trim() }
 
 if(!("bam" in flow)){
     Channel
-        .fromFilePairs(params.inDir, size: -1)
-        .ifEmpty {error"Cannot find any files matching: ${params.inDir}"}
+        .fromFilePairs(params.inFiles, size: -1)
+        .ifEmpty {error"Cannot find any files matching: ${params.inFiles}"}
         .into { read_files_1; read_files_2 }
 } else {
     Channel
-        .fromFilePairs(params.inDir, size: -1)
-        .ifEmpty {error"Cannot find any files matching: ${params.inDir}"}
+        .fromFilePairs(params.inFiles, size: -1)
+        .ifEmpty {error"Cannot find any files matching: ${params.inFiles}"}
         .into { bam_miso; bam_rnaseqc }
 }
 
