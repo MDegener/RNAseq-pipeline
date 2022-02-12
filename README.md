@@ -18,7 +18,7 @@ The following tools are implemented in the pipeline:
 
 1. Install [nextflow](https://www.nextflow.io/docs/latest/getstarted.html) and [miniconda](https://docs.conda.io/en/latest/miniconda.html) 
 
-2. Set up a conda environment with the required software: 
+2. Set up a conda environment with the required software:
 
 `conda create -p ./pipeline-env -c bioconda misopy samtools rna-seqc fastqc multiqc star`
 
@@ -56,6 +56,8 @@ mv ./lib/commonshortest ./lib/miso_annotations_gencode_v26_refChrOnly
 mkdir ./lib/miso_SE_indexed_hg38
 index_gff --index ./lib/miso_annotations_gencode_v26_refChrOnly/SE.hg38.gff3 ./lib/miso_SE_indexed_hg38
 ```
+
+6. Adapt default paths in `config/nextflow.config` according to your system.
 
 ## Running the pipeline
 

@@ -17,6 +17,7 @@ log.info "\n"
  * General inFiles parameters validation
  */
  
+envDir                          = params.envDir
 libDir                         	= params.libDir
 outDir				            = params.outDir
 multiqc_file                    = file(params.multiqc)
@@ -46,6 +47,7 @@ if(!("bam" in flow)){
   if("fastqc" in flow){
       process fastqc {
           label "fastqc"
+		  conda "$envDir"
 
           publishDir = [path: "$outDir/fastqc", mode: 'copy']
           tag "reads: $sample_id"
@@ -62,11 +64,11 @@ if(!("bam" in flow)){
           
           if(single)
               """
-              /opt/cmbi/bin/fastqc ${reads}
+              fastqc ${reads}
               """
           else
               """
-              /opt/cmbi/bin/fastqc ${reads[0]} ${reads[1]}
+              fastqc ${reads[0]} ${reads[1]}
               """
       }
   } else {
@@ -76,6 +78,7 @@ if(!("bam" in flow)){
   if("star" in flow){
       process star {
           label "mapping"
+		  conda "$envDir"
           cpus 8
           publishDir = [path: "$outDir/star_output", mode:'copy']
           tag "reads: $sample_id"
@@ -92,11 +95,11 @@ if(!("bam" in flow)){
           def single = reads instanceof Path
           if(single)
               """
-              /opt/cmbi/bin/STAR --runThreadN ${task.cpus} --genomeDir ${star_index} --readFilesIn ${reads} --readFilesCommand gunzip -c --outSAMtype BAM Unsorted --outFileNamePrefix "${sample_id}."
+              STAR --runThreadN ${task.cpus} --genomeDir ${star_index} --readFilesIn ${reads} --readFilesCommand gunzip -c --outSAMtype BAM Unsorted --outFileNamePrefix "${sample_id}."
               """
           else
               """
-              /opt/cmbi/bin/STAR --runThreadN ${task.cpus} --genomeDir ${star_index} --readFilesIn ${reads[0]} ${reads[1]} --readFilesCommand gunzip -c --outSAMtype BAM Unsorted --outFileNamePrefix "${sample_id}."
+              STAR --runThreadN ${task.cpus} --genomeDir ${star_index} --readFilesIn ${reads[0]} ${reads[1]} --readFilesCommand gunzip -c --outSAMtype BAM Unsorted --outFileNamePrefix "${sample_id}."
               """
       }
   } else {
@@ -106,6 +109,7 @@ if(!("bam" in flow)){
   if("sort" in flow){
       process sorting{
           label "counting"
+		  conda "$envDir"
           cpus 8
           publishDir = [path: "$outDir/sort_index", mode:'copy']
           tag "bam: $sample_id"
@@ -118,7 +122,7 @@ if(!("bam" in flow)){
             
           script:
               """
-              /opt/cmbi/bin/samtools sort --threads ${task.cpus} ${bam} -o ${sample_id}.Aligned.sorted.out.bam
+              samtools sort --threads ${task.cpus} ${bam} -o ${sample_id}.Aligned.sorted.out.bam
               """
       }
   }
@@ -126,6 +130,7 @@ if(!("bam" in flow)){
   if("index" in flow){
       process index{
           label "counting"
+		  conda "$envDir"
           cpus 8
           publishDir = [path: "$outDir/sort_index", mode:'copy']
           tag "bam: $sample_id"
@@ -138,7 +143,7 @@ if(!("bam" in flow)){
             
           script:
               """
-              /opt/cmbi/bin/samtools index -@ ${task.cpus} ${bam_s}
+              samtools index -@ ${task.cpus} ${bam_s}
               """
       }
   }
@@ -147,6 +152,7 @@ if("miso" in flow){
 
   process miso{
     label "miso"
+	conda "$envDir"
     cpus 2
     publishDir = [path: "$outDir/miso/output", mode:'copy']
     tag "bam: $sample_id"
@@ -159,7 +165,6 @@ if("miso" in flow){
       
     script:
       """
-      source /home/maxd/miniconda3/bin/activate /home/maxd/miso-env
       cp ${miso_settings} ./miso_settings.txt
       sed -i 's/num_processors = [0-9]*/num_processors = ${task.cpus}/g' ./miso_settings.txt
       miso --settings-filename="miso_settings.txt" \
@@ -171,6 +176,7 @@ if("miso" in flow){
 
   process summarize_miso{
     label "summarize_miso"
+	conda "$envDir"
     publishDir = [path: "$outDir/miso", mode:'copy']
     tag "bam: $sample_id"
     
@@ -182,7 +188,6 @@ if("miso" in flow){
       
     script:
       """
-      source /home/maxd/miniconda3/bin/activate /home/maxd/miso-env
       summarize_miso --summarize-samples $sample_id ./
       """
   }
@@ -190,8 +195,9 @@ if("miso" in flow){
 
 if("rnaseqc" in flow){
     process rnaseqc{
+	    label "rnaseqc"
+		conda "$envDir"
         cpus 1
-        label "rnaseqc"
         tag "bam: $sample_id"
         publishDir = [path: "$outDir/rnaseqc_output", mode: 'copy']
 
@@ -205,12 +211,10 @@ if("rnaseqc" in flow){
         script:
           if(params.paired == "no")
             """
-            source /home/maxd/miniconda3/bin/activate /home/maxd/rnaseqc-env
             rnaseqc --unpaired ${gtf} ${sample_id}*.bam ${sample_id}
             """
           else
             """
-            source /home/maxd/miniconda3/bin/activate /home/maxd/rnaseqc-env
             rnaseqc ${gtf} ${sample_id}*.bam ${sample_id}
             """
     }
@@ -218,7 +222,8 @@ if("rnaseqc" in flow){
 
 if("multiqc" in flow){
   process multiqc {
-      label "report"
+      label "report"       
+	  conda "$envDir"
       publishDir = [path: "$outDir/multiqc_report", mode:'copy']
   
       input:
